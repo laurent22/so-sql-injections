@@ -1,0 +1,30 @@
+# Learn more about services, parameters and containers at
+# http://symfony.com/doc/current/book/service_container.html
+parameters:
+#    parameter_name: value
+
+services:
+
+    app.eloquent:
+        class: AppBundle\Eloquent
+        arguments: []
+
+    app.stack_exchange_api:
+        class: AppBundle\StackExchangeApi
+        arguments: []
+
+    app.question_crawler:
+        class: AppBundle\QuestionCrawler
+        arguments: [%kernel.root_dir%, '@app.eloquent', '@app.stack_exchange_api']
+
+    app.user_crawler:
+        class: AppBundle\UserCrawler
+        arguments: ['@app.eloquent', '@app.stack_exchange_api']
+
+    app.injection_finder:
+        class: AppBundle\InjectionFinder
+        arguments: ['@app.eloquent']
+
+    app.report_service:
+        class: AppBundle\ReportService
+        arguments: ['@app.eloquent']
