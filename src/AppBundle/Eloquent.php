@@ -2,8 +2,6 @@
 
 namespace AppBundle;
 
-// use Illuminate\Database\Capsule\Manager;
-
 class Eloquent {
 
 	private $capsule_ = null;
@@ -22,15 +20,6 @@ class Eloquent {
 			'prefix'    => '',
 		]);
 
-		// Set the event dispatcher used by Eloquent models... (optional)
-		// use Illuminate\Events\Dispatcher;
-		// use Illuminate\Container\Container;
-		// $this->capsule_->setEventDispatcher(new Dispatcher(new Container));
-
-		// Make this Capsule instance available globally via static methods... (optional)
-		// $this->capsule_->setAsGlobal();
-
-		// Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
 		$this->capsule_->bootEloquent();
 	}
 
