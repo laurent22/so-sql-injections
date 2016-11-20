@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"count",
+				"countryGeonameIds"
+			],
+			[
+				"countr",
+				"countryId"
+			],
+			[
+				"geo",
+				"geoname_id"
+			],
+			[
 				"hassq",
 				"has_sql_count"
 			],
@@ -360,26 +372,54 @@
 	"buffers":
 	[
 		{
-			"file": "src/AppBundle/InjectionFinder.php",
+			"file": "src/AppBundle/Command/PopulatePlaceTablesCommand.php",
 			"settings":
 			{
-				"buffer_size": 3056,
+				"buffer_size": 3143,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/AppBundle/QuestionCrawler.php",
+			"contents": "grep -P '^(3041565|290557|1149361|3576396|3573511|783754|174982|3351879|6697173|3865483|5880801|2782113|2077456|3577279|661882|587116|3277605|3374084|1210997|2802361|2361809|732800|290291|433561|2395170|3578476|3573345|1820814|3923057|7626844|3469034|3572887|1252634|3371123|933860|630336|3582678|6251999|1547376|203312|239880|2260494|2658434|2287781|1899402|3895114|2233387|1814991|3686110|3624060|3562981|3374766|7626836|2078138|146669|3077311|2921044|223816|2623032|3575830|3508796|2589581|3658394|453733|357994|2461445|338010|2510769|337996|660013|2205218|3474414|2081918|2622320|3017382|2400553|2635167|3580239|614540|3381670|3042362|2300660|2411586|3425505|2413451|2420477|3579143|2309096|390903|3474415|3595528|4043988|2372248|3378535|1819730|1547314|3608932|3202326|3723988|719819|1643084|2963597|294640|3042225|1269750|1282588|99237|130758|2629691|3175395|3042142|3489940|248816|1861060|192950|1527747|1831722|4030945|921929|3575174|1873107|1835841|831053|285570|3580718|1522867|1655842|272103|3576468|3042058|1227603|2275384|932692|597427|2960313|458258|2215636|2542007|2993457|617790|3194884|3578421|1062947|2080185|718075|2453866|1327865|2029969|1821275|4041468|3570311|2378080|3578097|2562770|934292|1282028|927384|3996063|1733045|1036973|3355338|2139685|2440476|2155115|2328926|3617476|2750405|3144096|1282988|2110425|4036232|2186224|286963|3703430|3932488|4030656|2088628|1694008|1168579|798544|3424932|4030699|4566966|6254930|2264397|1559582|3437598|289688|935317|798549|6290252|2017370|49518|102358|2103350|241170|366755|7909807|2661886|1880251|3370751|3190538|607072|3057568|2403846|3168068|2245662|51537|3382998|2410758|3585968|7609695|163843|934841|3576916|2434508|1546748|2363686|1605651|1220409|4031074|1966436|1218197|2464461|4032283|298795|3573591|2110297|1668284|149590|690791|226074|5854968|6252001|3439705|1512440|3164670|3577815|3625428|3577718|4796775|1562822|2134431|4034749|4034894|69543|1024031|953987|895949|878675|8505033|8505032)\\t' allCountries.txt > countries_only.txt",
 			"settings":
 			{
-				"buffer_size": 4353,
+				"buffer_size": 2005,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/AppBundle/Controller/DefaultController.php",
+			"file": "var/places/countries_only.txt",
 			"settings":
 			{
-				"buffer_size": 751,
+				"buffer_size": 481008,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/AppBundle/Model/Place.php",
+			"settings":
+			{
+				"buffer_size": 234,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "var/places/countryInfo.txt",
+			"settings":
+			{
+				"buffer_size": 31416,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "structure.sql",
+			"settings":
+			{
+				"buffer_size": 2646,
+				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		}
@@ -391,10 +431,30 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 92.0,
-		"last_filter": "",
+		"height": 392.0,
+		"last_filter": "re",
 		"selected_items":
 		[
+			[
+				"re",
+				"File: Rename"
+			],
+			[
+				"word",
+				"Word Wrap: Toggle"
+			],
+			[
+				"de",
+				"File: Delete"
+			],
+			[
+				"ren",
+				"File: Rename"
+			],
+			[
+				"rene",
+				"File: Rename"
+			],
 			[
 				"sql",
 				"SQL Beautifier: Format Current SQL File"
@@ -406,10 +466,6 @@
 			[
 				"rena",
 				"File: Rename"
-			],
-			[
-				"word",
-				"Word Wrap: Toggle"
 			],
 			[
 				"upper",
@@ -616,7 +672,7 @@
 				"Package Control: Install Package"
 			]
 		],
-		"width": 476.0
+		"width": 432.0
 	},
 	"console":
 	{
@@ -639,15 +695,55 @@
 	},
 	"expanded_folders":
 	[
-		"/home/laurent/src/testimport2",
-		"/home/laurent/src/testimport2/src",
-		"/home/laurent/src/testimport2/src/AppBundle",
-		"/home/laurent/src/testimport2/src/AppBundle/Command",
-		"/home/laurent/src/testimport2/src/AppBundle/Controller",
-		"/home/laurent/src/testimport2/src/AppBundle/Model"
+		"/D/Docs/PROGS/PHP/OverInjection",
+		"/D/Docs/PROGS/PHP/OverInjection/app",
+		"/D/Docs/PROGS/PHP/OverInjection/app/config",
+		"/D/Docs/PROGS/PHP/OverInjection/src",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Controller",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Model"
 	],
 	"file_history":
 	[
+		"/D/Docs/PROGS/PHP/OverInjection/var/places/countries_only.txt",
+		"/D/Docs/PROGS/PHP/OverInjection/var/places/cities1000.txt",
+		"/D/Docs/PROGS/PHP/OverInjection/var/places/alternateNames.txt",
+		"/D/Docs/PROGS/PHP/OverInjection/var/places/allCountries.txt",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Model/Place.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Model/Country.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Model/City.php",
+		"/D/Docs/PROGS/PHP/OverInjection/structure.sql",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/ReportService.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/CountryUtils.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command/PopulatePlaceTablesCommand.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Model/User.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/UserFinder.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command/RefreshUsersCommand.php",
+		"/C/Users/Laurent/AppData/Local/Temp/7zO45608A4E/cities1000.txt",
+		"/C/Users/Laurent/AppData/Local/Temp/7zO456C1C5D/cities1000.txt",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command/RefreshQuestionsCommand.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/QuestionCrawler.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/StackExchangeApi.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command/CrawlQuestionsCommand.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Model/Question.php",
+		"/D/Docs/PROGS/PHP/OverInjection/process-questions.sh",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command/RefreshQuestionCommand.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command/FindWinnersCommand.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/InjectionFinder.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Command/FindUsersCommand.php",
+		"/D/Docs/PROGS/PHP/OverInjection/app/config/services.yml",
+		"/D/Web/www/pogopixels/deploy.sh",
+		"/D/Docs/PROGS/go/src/pmcctv/test.sh",
+		"/D/Web/www/pogopixels/download/mainPage.php.inc",
+		"/D/Web/www/pogopixels/download/index.php",
+		"/D/Web/www/pogopixels/contact/index.php",
+		"/D/Web/www/pogopixels/includes/htmlBits.php.inc",
+		"/D/Web/www/pogopixels/localization/contact/en.txt",
+		"/D/Web/www/pogopixels/localization/contact/fr.txt",
+		"/D/Web/www/pogopixels/includes/common.php.inc",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/BaseService.php",
+		"/D/Docs/PROGS/PHP/OverInjection/src/AppBundle/Eloquent.php",
 		"/home/laurent/src/testimport2/src/AppBundle/Model/Question.php",
 		"/home/laurent/src/testimport2/structure.sql",
 		"/home/laurent/src/testimport2/app/config/services.yml",
@@ -737,49 +833,11 @@
 		"/var/www/cohortglobal/wp-content/plugins/hive-offer-path/hive-offer-path.php",
 		"/var/www/hive/www/delivery/tpn/tpnAdCoregClass.js",
 		"/var/www/hive/lib/max/Admin/UI/Field/DaySpanField.php",
-		"/var/www/hive/lib/max/Admin/UI/Field/CheckboxField.php",
-		"/var/www/hive/www/admin/channel-edit.php",
-		"/home/laurent/src/testimport/test.php",
-		"/var/www/hive/lib/max/Admin/UI/Field/PublisherIdField.php",
-		"/var/www/hive/lib/pear/HTML/Template/Flexy.php",
-		"/var/www/hive/lib/OA/Admin/Statistics/Delivery/Flexy.php",
-		"/var/www/hive/lib/OA/Admin/Statistics/Flexy.php",
-		"/var/www/hive/plugins/reports/oxReportsStandard/siteManagerEarningsReport.class.php",
-		"/var/www/hive/plugins/reports/oxReportsStandard/tpnBillingIntegrationReport.class.php",
-		"/var/www/hive/www/admin/assets/css/report-form.css",
-		"/var/www/hive/lib/max/Admin/UI/Field/SiteCampaignSelectionField.php",
-		"/var/www/hive/lib/max/Admin/UI/Field/SiteCampaignSelectionField.view.php",
-		"/var/www/hive/lib/OA/Admin/Reports/Index.php",
-		"/var/www/hive/lib/max/Admin/UI/Field.php",
-		"/var/www/hive/lib/OA/Admin/Reports/Generate.php",
-		"/var/www/hive/lib/max/Admin/UI/Field/MultiSelectField.php",
-		"/var/www/hive/lib/ViewUtils.php",
-		"/var/www/hive/lib/max/Admin/UI/FieldFactory.php",
-		"/var/www/hive/plugins/reports/oxReportsStandard/advertiserDailyReport.class.php",
-		"/var/www/hive/lib/PHPExcel/PHPExcel/Settings.php",
-		"/var/www/hive/init.php",
-		"/var/www/hive/www/admin/report-generation.php",
-		"/var/www/hive/lib/OX/Extension/reports/ReportsScope.php",
-		"/var/www/hive/lib/OX/Extension/reports/Reports.php",
-		"/var/www/hive/variables.php",
-		"/var/www/hive/plugins/reports/oxReportsStandard/campaignStatsByTrackerVariableReport.view.php",
-		"/var/www/hive/lib/DbUtils.php",
-		"/var/www/hive/lib/max/Admin/Cache.php",
-		"/var/www/hive/lib/max/Admin/Geotargeting.php",
-		"/var/www/hive/lib/max/Admin/DB.php",
-		"/var/www/cohortglobal/wp-content/plugins/wordfence/js/knockout-3.3.0.js",
-		"/var/www/hive/lib/pear/MDB2.php",
-		"/var/www/hive/lib/xajax/xajaxCompress.php",
-		"/var/www/cohortglobal/wp-content/plugins/hive-offer-path/dat/au-postcodes.txt",
-		"/var/www/hive/www/admin/tpn-stats-earnings.php",
-		"/var/www/hive/www/admin/plugins/oxMarket/market-stats.php",
-		"/var/www/hive/www/admin/stats-conversions.php",
-		"/var/www/hive/www/admin/stats-showgraph.php",
-		"/var/www/hive/www/admin/report-generate.php"
+		"/var/www/hive/lib/max/Admin/UI/Field/CheckboxField.php"
 	],
 	"find":
 	{
-		"height": 34.0
+		"height": 35.0
 	},
 	"find_in_files":
 	{
@@ -801,6 +859,37 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"place_names",
+			"$e->connection()",
+			"die();",
+			"geonameid",
+			"`id`",
+			"\"",
+			"/",
+			"id",
+			"country_id",
+			"city",
+			"id",
+			"is_processed",
+			"questions",
+			"paris",
+			"')",
+			"$this->",
+			"$result",
+			"userIds",
+			"22656",
+			"9867",
+			"settingPath_",
+			"has_sql_injection",
+			"$q",
+			"$question",
+			"$m",
+			"user_crawler",
+			"crawl-users",
+			"w3",
+			"includes",
+			"contact",
+			"new Exception",
 			"Question",
 			"09-29",
 			"questions",
@@ -897,38 +986,7 @@
 			"weight",
 			"weightElem",
 			"possibleAds",
-			"CAMPAIGN_TYPE_CONTRACT_EXCLUSIVE",
-			"define(\"CAMPAIGN_TYPE_CONTRACT_EXCLUSIVE\"",
-			"define('CAMPAIGN_TYPE_CONTRACT_EXCLUSIVE'",
-			"_tpnWeightAdSelect",
-			"CONVERT(s.tpn_settings_value, DECIMAL",
-			"WHEN pc.earnings_modifier IS",
-			"COALESCE(pc.earnings_modifier, p.earnings_modifier, ",
-			"$d",
-			"resolver",
-			"connection",
-			"$eloquent",
-			"instance",
-			"table",
-			"\t",
-			"$capsule",
-			"where",
-			"from",
-			"select",
-			"is_lastname",
-			"given",
-			";\n",
-			"ox_name_dictionary",
-			"ox_name_dictionary_id",
-			"Laurent",
-			"Downloads",
-			"delete",
-			"400px",
-			"label",
-			"class TPNCoregApi",
-			"tpnCoregApi",
-			"aVariablesMandatory",
-			"saveDefaults"
+			"CAMPAIGN_TYPE_CONTRACT_EXCLUSIVE"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -953,16 +1011,44 @@
 	"groups":
 	[
 		{
-			"selected": 2,
+			"selected": 0,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/AppBundle/InjectionFinder.php",
+					"file": "src/AppBundle/Command/PopulatePlaceTablesCommand.php",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3056,
+						"buffer_size": 3143,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3097,
+								2152
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/PHP/PHP.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 1165.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2005,
 						"regions":
 						{
 						},
@@ -970,13 +1056,12 @@
 						[
 							[
 								0,
-								0
+								2005
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/PHP/PHP.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -986,62 +1071,116 @@
 					"type": "text"
 				},
 				{
-					"buffer": 1,
-					"file": "src/AppBundle/QuestionCrawler.php",
+					"buffer": 2,
+					"file": "var/places/countries_only.txt",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 4353,
+						"buffer_size": 481008,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								158370,
+								158370
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/PHP/PHP.sublime-syntax",
-							"translate_tabs_to_spaces": false
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 23762.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
 					"type": "text"
 				},
 				{
-					"buffer": 2,
-					"file": "src/AppBundle/Controller/DefaultController.php",
-					"semi_transient": true,
+					"buffer": 3,
+					"file": "src/AppBundle/Model/Place.php",
+					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 751,
+						"buffer_size": 234,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								372,
-								413
+								229,
+								229
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/PHP/PHP.sublime-syntax",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/PHP/PHP.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 0,
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "var/places/countryInfo.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 31416,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6114,
+								6114
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 1035.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "structure.sql",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2646,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2268,
+								2224
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/SQL/SQL.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 557.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 5,
 					"type": "text"
 				}
 			]
@@ -1049,7 +1188,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 25.0
+		"height": 27.0
 	},
 	"input":
 	{
@@ -1094,7 +1233,7 @@
 	"project": "testimport.sublime-project",
 	"replace":
 	{
-		"height": 62.0
+		"height": 50.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -1104,6 +1243,30 @@
 		"selected_items":
 		[
 			[
+				"struc",
+				"structure.sql"
+			],
+			[
+				"stru",
+				"structure.sql"
+			],
+			[
+				"country",
+				"src\\AppBundle\\CountryUtils.php"
+			],
+			[
+				"user",
+				"src\\AppBundle\\Model\\User.php"
+			],
+			[
+				"refreshuser",
+				"src\\AppBundle\\Command\\RefreshUsersCommand.php"
+			],
+			[
+				"appbundle/questioncrawler.php",
+				"src\\AppBundle\\QuestionCrawler.php"
+			],
+			[
 				"quest",
 				"src/AppBundle/Model/Question.php"
 			],
@@ -1112,24 +1275,12 @@
 				"app/config/services.yml"
 			],
 			[
-				"stru",
-				"structure.sql"
-			],
-			[
-				"struc",
-				"structure.sql"
-			],
-			[
 				"user.",
 				"src/AppBundle/Model/User.php"
 			],
 			[
 				"stacke",
 				"src/AppBundle/StackExchangeApi.php"
-			],
-			[
-				"user",
-				"src/AppBundle/Model/User.php"
 			],
 			[
 				"questr",
@@ -1602,18 +1753,6 @@
 			[
 				"jquerymod",
 				"hive/www/admin/assets/js/jquery-1.2.6-mod.js"
-			],
-			[
-				"runrat",
-				"hive/plugins/reports/oxReportsStandard/campaignForecastRunRateReport.class.php"
-			],
-			[
-				"default.",
-				"cohortglobal/conf/default.vcl"
-			],
-			[
-				"campaignrunrate",
-				"hive/plugins/reports/oxReportsStandard/campaignForecastRunRateReport.class.php"
 			]
 		],
 		"width": 0.0

@@ -15,9 +15,11 @@ class FindWinnersCommand extends ContainerAwareCommand {
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
-		// $service = $this->getContainer()->get('app.report_service');
+		$service = $this->getContainer()->get('app.report_service');
 		// //$r = $service->monthlyInjections();
-		// $r = $service->latestInjections();
+		$r = $service->sqlInjectionsPerCountry();
+		echo json_encode($r);die();
+		var_dump($r);die();
 		// foreach ($r as $line) {
 		// 	var_dump($line);
 		// }

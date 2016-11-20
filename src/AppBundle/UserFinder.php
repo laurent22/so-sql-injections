@@ -6,7 +6,7 @@ use AppBundle\Model\Question;
 use AppBundle\Model\User;
 use AppBundle\BaseService;
 
-class UserCrawler extends BaseService {
+class UserFinder extends BaseService {
 
 	private $db_ = null;
 	private $api_ = null;
@@ -35,14 +35,24 @@ class UserCrawler extends BaseService {
 					if (!(int)$question->owner_id) continue;
 					$userIds[] = $question->owner_id;
 				}
+
 				$userIds = array_unique($userIds);
 				$users = User::findMany($userIds);
 				$existingUserIds = array();
 				foreach ($users as $user) $existingUserIds[] = $user->user_id;
+				$existingUserIds = array_unique($existingUserIds);
 
 				$userIds = array_diff($userIds, $existingUserIds);
+				$userIds = array_unique($userIds);
 
-				$results = $this->api_->users($userIds);
+				$results = count($userIds) ? $this->api_->users($userIds) : array('items' => array());
+
+				if (isset($results['backoff'])) {
+					$this->writeln("Got 'backoff' parameter: " . $results['backoff']);
+					sleep($results['backoff'] + 1); // Wait a bit longer than required so as not to be blocked
+					continue;
+				}
+
 				foreach ($results['items'] as $result) {
 					$user = new User();
 					$user->fromApiArray($result);
@@ -54,12 +64,7 @@ class UserCrawler extends BaseService {
 			}
 			$this->db_->commit();
 
-			if (isset($result['backoff'])) {
-				$this->writeln("Got 'backoff' parameter: " . $result['backoff']);
-				sleep($result['backoff'] + 1); // Wait a bit longer than required so as not to be blocked
-			}
-
-			sleep(5);
+			sleep(1);
 
 			$offset += $limit;
 		}
@@ -80,7 +85,7 @@ class UserCrawler extends BaseService {
 			try {
 				foreach ($users as $user) {
 					$u = json_decode($user->raw_json, true);
-					
+					$user->fromApiArray($u);
 					$user->save();
 				}
 			} catch (\Exception $e) {

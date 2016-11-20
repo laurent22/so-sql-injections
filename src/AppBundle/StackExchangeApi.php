@@ -41,6 +41,7 @@ class StackExchangeApi {
 	}
 
 	public function users($ids) {
+		if (!count($ids)) throw new \Exception('No user IDs specified');
 		$query = array();
 		$query['filter'] = '!LnO)*RBjDUSz2sWDlSDTDB';
 

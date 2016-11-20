@@ -21,7 +21,7 @@ class QuestionCrawler extends BaseService {
 		$settings = $this->loadSettings();
 
 		if (!isset($settings['fromDate'])) {
-			$d = new DateTime();
+			$d = new \DateTime();
 			$d->setDate(2008,07,31); // Private beta
 			//$d->setDate(2008,9,15); // Public beta
 			$d->setTime(0,0,0);
@@ -52,6 +52,26 @@ class QuestionCrawler extends BaseService {
 			$this->write("Processing " . date('Y-m-d', $fromDate) . ' to ' . date('Y-m-d', $toDate) . ', page ' . $page . "... ");
 
 			$result = $this->api_->questions($fromDate, $toDate, $page);
+
+			$result = json_decode('{"error_id":502,"error_message":"too many requests from this IP, more requests available in 32322 seconds","error_name":"throttle_violation"}', true);
+
+			// {"error_id":502,"error_message":"too many requests from this IP, more requests available in 32322 seconds","error_name":"throttle_violation"}
+
+			if (isset($result['error_id'])) {
+				$this->writeln('');
+				$this->writeln('Got error: ' . json_encode($result));
+				if (isset($result['error_message'])) {
+					preg_match('/available in (.*) seconds/', $result['error_message'], $matches);
+					if (isset($matches[1])) {
+						$this->writeln('Waiting for ' . gmdate('H\h i\m s\s', $matches[1]) . '...');
+						sleep($matches[1]);
+						continue;
+					} else {
+						throw new \Exception('Unexpected error: ' . json_encode($result));
+					}
+				}
+			}
+
 			if (!isset($result['items'])) throw new \Exception('No "items" property on object: ' . json_encode($result));
 			$this->saveQuestions($result['items']);
 			$settings['fromDate'] = $fromDate;
@@ -91,10 +111,7 @@ class QuestionCrawler extends BaseService {
 		foreach ($questions as $question) {
 			try {
 				$m = new Question();
-				$m->question_id = $question['question_id'];
-				$m->body_markdown = $question['body_markdown'];
-				$m->creation_date = $question['creation_date'];
-				$m->raw_json = json_encode($question);
+				$m->fromApiArray($question);
 				$m->save();
 			} catch (\Illuminate\Database\QueryException $e) {
 				// SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '576908' for key 'PRIMARY'
@@ -125,7 +142,7 @@ class QuestionCrawler extends BaseService {
 			try {
 				foreach ($questions as $question) {
 					$q = json_decode($question->raw_json, true);
-					$question->owner_id = isset($q['owner']['user_id']) ? $q['owner']['user_id'] : 0;
+					$question->fromApiArray($q);
 					$question->save();
 				}
 			} catch (\Exception $e) {
@@ -139,7 +156,8 @@ class QuestionCrawler extends BaseService {
 	}
 
 	private function loadSettings() {
-		$d = @file_get_contents($this->settingPath_);
+		if (!file_exists($this->settingPath_)) return array();
+		$d = file_get_contents($this->settingPath_);
 		if ($d === false) return array();
 		return json_decode($d, true);
 	}

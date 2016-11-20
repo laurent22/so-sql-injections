@@ -17,8 +17,8 @@ services:
         class: AppBundle\QuestionCrawler
         arguments: [%kernel.root_dir%, '@app.eloquent', '@app.stack_exchange_api']
 
-    app.user_crawler:
-        class: AppBundle\UserCrawler
+    app.user_finder:
+        class: AppBundle\UserFinder
         arguments: ['@app.eloquent', '@app.stack_exchange_api']
 
     app.injection_finder:
