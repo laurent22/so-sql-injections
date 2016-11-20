@@ -4,6 +4,9 @@
 /var/*
 !/var/cache
 /var/cache/*
+!/var/places
+/var/places/*
+!/var/places/README.md
 !var/cache/.gitkeep
 !/var/logs
 /var/logs/*
