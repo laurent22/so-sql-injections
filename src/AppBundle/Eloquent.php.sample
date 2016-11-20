@@ -13,7 +13,7 @@ class Eloquent {
 			'driver'    => 'mysql',
 			'host'      => '127.0.0.1',
 			'database'  => 'sql_injections',
-			'username'  => 'root',
+			'username'  => '',
 			'password'  => '',
 			'charset'   => 'utf8',
 			'collation' => 'utf8_unicode_ci',
