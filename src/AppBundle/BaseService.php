@@ -12,12 +12,16 @@ class BaseService {
 
 	protected function writeln($s) {
 		if (!$this->output_) return;
-		$this->output_->writeln($s);
+		$this->output_->writeln($this->formatLine($s));
 	}
 
 	protected function write($s) {
 		if (!$this->output_) return;
-		$this->output_->write($s);
+		$this->output_->write($this->formatLine($s));
+	}
+
+	private function formatLine($s) {
+		return date('Y-m-d H:i:s', time()) . ': ' . $s;
 	}
 
 }

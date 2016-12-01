@@ -37,7 +37,10 @@ PRIMARY KEY (`user_id`)
 ALTER TABLE users ADD country varchar(2);
 ALTER TABLE users ADD updated_at datetime;
 ALTER TABLE users ADD created_at datetime;
+ALTER TABLE users CHANGE location location varchar(255) NULL;
 UPDATE users SET created_at = '2016-09-30 00:00:00', updated_at = '2016-09-30 00:00:00';
+ALTER TABLE `users` ADD INDEX `user_id` (`user_id`);
+ALTER TABLE `users` ADD INDEX `country` (`country`);
 
 # Countries
 

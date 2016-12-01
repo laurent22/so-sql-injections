@@ -18,7 +18,6 @@ class FindUsersCommand extends ContainerAwareCommand {
 		$crawler = $this->getContainer()->get('app.user_finder');
 		$crawler->setOutput($output);
 		$crawler->execute();
-		// $crawler->refreshQuestions();
 	}
 
 }

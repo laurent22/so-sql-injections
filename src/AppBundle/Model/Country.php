@@ -32,18 +32,18 @@ class Country extends \Illuminate\Database\Eloquent\Model {
 	}
 
 	static public function countryName($code) {
+		$code = strtoupper($code);
+		if (isset(self::$countryCodeToName_[$code])) return self::$countryCodeToName_[$code];
 		$country = self::byCode($code);
 		return $country->name();
-		// $code = strtoupper($code);
-		// if (!isset(self::$countryCodeToName_[$code])) throw new \Exception('Invalid code: ' . $code);
-		// return self::$countryCodeToName_[$code];
 	}
 
-	// static public function countryCode($name) {
-	// 	$place = Place::where('country_id', '>', 0)->where('name', '=', $name)->first();
-	// 	if (!$place) throw new \Exception('Invalid name: ' . $name);
-	// 	return $place->country()->code;
-	// }
+	static public function topCountries() {
+		$sql = 'SELECT country, count(*) total FROM users WHERE country IS NOT NULL GROUP BY country ORDER BY total DESC LIMIT 40';
+		$con = (new self())->getConnection();
+		$results = $con->getPdo()->query($sql);
+		return $results->fetchAll(\PDO::FETCH_ASSOC);
+	}
 
 	static private $countryCodeToName_ = array(
 		'AF' => 'Afghanistan',
@@ -148,7 +148,7 @@ class Country extends \Illuminate\Database\Eloquent\Model {
 		'IS' => 'Iceland',
 		'IN' => 'India',
 		'ID' => 'Indonesia',
-		'IR' => 'Iran, Islamic Republic Of',
+		'IR' => 'Iran',
 		'IQ' => 'Iraq',
 		'IE' => 'Ireland',
 		'IM' => 'Isle Of Man',
@@ -226,7 +226,7 @@ class Country extends \Illuminate\Database\Eloquent\Model {
 		'QA' => 'Qatar',
 		'RE' => 'Reunion',
 		'RO' => 'Romania',
-		'RU' => 'Russian Federation',
+		'RU' => 'Russia',
 		'RW' => 'Rwanda',
 		'BL' => 'Saint Barthelemy',
 		'SH' => 'Saint Helena',

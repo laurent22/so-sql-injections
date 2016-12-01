@@ -18,7 +18,6 @@ class CrawlQuestionsCommand extends ContainerAwareCommand {
 		$crawler = $this->getContainer()->get('app.question_crawler');
 		$crawler->setOutput($output);
 		$crawler->execute();
-		// $crawler->refreshQuestions();
 	}
 
 }

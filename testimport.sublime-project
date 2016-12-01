@@ -4,7 +4,6 @@
 		{
 			"folder_exclude_patterns":
 			[
-				"vendor",
 				"var/cache",
 				"var/logs"
 			],

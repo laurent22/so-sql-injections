@@ -24,9 +24,9 @@ class PopulatePlaceTablesCommand extends ContainerAwareCommand {
 		$rootDir = $this->getContainer()->get('kernel')->getRootDir();
 		$placesDir = dirname($rootDir) . '/var/places';
 
-		$con->getPdo()->query('DELETE FROM countries');
-		$con->getPdo()->query('DELETE FROM cities');
-		$con->getPdo()->query('DELETE FROM places');
+		$con->getPdo()->query('TRUNCATE countries');
+		$con->getPdo()->query('TRUNCATE cities');
+		$con->getPdo()->query('TRUNCATE places');
 
 		// ---------------------------------------------------------------------------
 		// Countries

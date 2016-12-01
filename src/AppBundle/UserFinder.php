@@ -10,6 +10,7 @@ class UserFinder extends BaseService {
 
 	private $db_ = null;
 	private $api_ = null;
+	private $userIds_ = array();
 
 	public function __construct($eloquent, $stackExchangeApi) {
 		$this->db_ = $eloquent->connection();
@@ -17,42 +18,55 @@ class UserFinder extends BaseService {
 	}
 
 	public function execute() {
-		$offset = 0;
-		$limit = 100;
+		$limit = 1000;
+		$lastId = 0;
 
 		while (true) {
-			$questions = Question::orderBy('question_id', 'asc')
-			                     ->limit($limit)
-			                     ->offset($offset)
-			                     ->get();
+			$ownerIds = Question::ownerIdsWithNoUserObject($lastId, $limit);
+			if (!count($ownerIds)) break;
+			$this->processUsers($ownerIds);
+			if (count($ownerIds) <= 1) break;
+			$lastId = $ownerIds[count($ownerIds) - 1];			
+		}
 
-			if (!count($questions)) break;
+		$this->processAllUsers();
+	}
 
-			$this->db_->beginTransaction();
-			try {
-				$userIds = array();
-				foreach ($questions as $question) {
-					if (!(int)$question->owner_id) continue;
-					$userIds[] = $question->owner_id;
-				}
+	private function processAllUsers() {
+		$this->processUsers('all');
+	}
 
-				$userIds = array_unique($userIds);
-				$users = User::findMany($userIds);
-				$existingUserIds = array();
-				foreach ($users as $user) $existingUserIds[] = $user->user_id;
-				$existingUserIds = array_unique($existingUserIds);
+	private function processUsers($userIds) {
+		$allUsers = $userIds === 'all';
+		if (!count($userIds) && !$allUsers) return;
 
-				$userIds = array_diff($userIds, $existingUserIds);
-				$userIds = array_unique($userIds);
+		$bufferSize = 100;
 
-				$results = count($userIds) ? $this->api_->users($userIds) : array('items' => array());
+		if (!$allUsers) {
+			$this->userIds_ = array_merge($this->userIds_, $userIds);
+			$this->userIds_ = array_unique($this->userIds_);
+		}
+		
+		while (count($this->userIds_) >= $bufferSize) {
+			$d = array_slice($this->userIds_, 0, $bufferSize);
+			$this->userIds_ = array_slice($this->userIds_, $bufferSize);
 
+			$results = array();
+			while (true) {
+				$results = $this->api_->users($d);
 				if (isset($results['backoff'])) {
 					$this->writeln("Got 'backoff' parameter: " . $results['backoff']);
 					sleep($results['backoff'] + 1); // Wait a bit longer than required so as not to be blocked
 					continue;
 				}
+				break;
+			}
 
+			if (!isset($results['items'])) throw new \Exception('Missing "items" property: ' . json_encode($results));
+
+			$this->db_->beginTransaction();
+
+			try {
 				foreach ($results['items'] as $result) {
 					$user = new User();
 					$user->fromApiArray($result);
@@ -62,11 +76,10 @@ class UserFinder extends BaseService {
 				$this->db_->rollback();
 				throw $e;
 			}
+
 			$this->db_->commit();
 
 			sleep(1);
-
-			$offset += $limit;
 		}
 	}
 

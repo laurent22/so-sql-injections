@@ -27,4 +27,8 @@ services:
 
     app.report_service:
         class: AppBundle\ReportService
-        arguments: ['@app.eloquent']
+        arguments: ['@app.eloquent', '@app.cache']
+
+    app.cache:
+        class: AppBundle\CacheService
+        arguments: []

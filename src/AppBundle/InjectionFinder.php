@@ -14,15 +14,15 @@ class InjectionFinder extends BaseService {
 	}
 
 	public function execute() {
-		$offset = 0;
 		$limit = 1000;
 
 		while (true) {
 			$questions = Question::where('is_processed', '=', '0')
 			                     ->orderBy('question_id', 'asc')
 			                     ->limit($limit)
-			                     ->offset($offset)
 			                     ->get();
+
+			$this->writeln(sprintf('Processing %s questions', count($questions)));
 
 			if (!count($questions)) break;
 
@@ -41,8 +41,6 @@ class InjectionFinder extends BaseService {
 				throw $e;
 			}
 			$this->db_->commit();
-
-			$offset += $limit;
 		}
 	}
 

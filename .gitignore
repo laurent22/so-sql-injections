@@ -19,3 +19,6 @@
 /web/bundles/
 /src/AppBundle/Eloquent.php
 INFO.md
+crawl-question*.log
+get-question-count.php
+web/index.html

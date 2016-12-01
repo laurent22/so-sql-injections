@@ -2,31 +2,80 @@
 
 // - Latest injections
 // - Injections over time
+// - Totals as of <date>
+// - Put sample size per country
 
 namespace AppBundle;
 
 use AppBundle\Model\Question;
 use AppBundle\Model\Country;
+use AppBundle\BaseService;
 
-class ReportService {
+class ReportService extends BaseService {
 
 	private $db_ = null;
+	private $cache_ = null;
 
-	public function __construct($eloquent) {
+	public function __construct($eloquent, $cache) {
 		$this->db_ = $eloquent->connection();
+		$this->cache_ = $cache;
 	}
 
 	public function monthlyInjections() {
-		$results = $this->db_->getPdo()->query('
-			SELECT
-				extract(year_month FROM date(from_unixtime(creation_date))) month,
-				count(CASE WHEN has_sql = 1 THEN 1 END) has_sql_count,
-				count(CASE WHEN has_sql_injection = 1 THEN 1 END) has_sql_injection_count
-			FROM questions
-			WHERE has_sql = 1
-			GROUP BY month
-		');
-		return $results->fetchAll(\PDO::FETCH_ASSOC);
+		$d1 = new \DateTime();
+		$d1->setTimestamp(Question::earliestQuestionDate());
+		$d1->setDate($d1->format('Y'), $d1->format('m'), 1);
+		$d1->setTime(0,0,0);
+
+		$lastQuestionDate = Question::lastQuestionDate();
+
+		$output = array();
+
+		while (true) {
+			$d2 = clone $d1;
+			$d2->add(new \DateInterval('P' . $d2->format('t') . 'D'));
+
+			$cacheTimeout = 60 * 60 * 24 * 31 * 12;
+			$now = new \DateTime();
+			if ($d2->format('Y') >= $now->format('Y') && $d2->format('m') >= $now->format('m')) {
+				$cacheTimeout = 60 * 60 * 24;
+			}
+
+			$this->writeln("Processing " . $d1->format('Y-m') . '... Cache: ' . $cacheTimeout);
+
+			$params = array('date1' => $d1->getTimestamp(), 'date2' => $d2->getTimestamp());
+			
+			$rows = $this->cache_->getOrSet('ReportService::monthlyInjection' . md5(json_encode($params)), function() use($params) {
+				$st = $this->db_->getPdo()->prepare('
+					SELECT
+						has_sql_injection, has_sql
+					FROM questions
+					WHERE has_sql = 1 AND creation_date >= :date1 AND creation_date < :date2
+				');
+				$st->execute($params);
+
+				return $st->fetchAll(\PDO::FETCH_ASSOC);
+			}, $cacheTimeout);
+
+			$summary = array(
+				'month' => $d1->format('Ym'),
+				'has_sql_count' => 0,
+				'has_sql_injection_count' => 0,
+			);
+
+			foreach ($rows as $row) {
+				if ((int)$row['has_sql']) $summary['has_sql_count']++;
+				if ((int)$row['has_sql_injection']) $summary['has_sql_injection_count']++;
+			}
+
+			$output[] = $summary;
+
+			$d1 = clone $d2;
+
+			if ($d1->getTimestamp() > $lastQuestionDate) break;
+		}
+
+		return $output;
 	}
 
 	public function latestInjections() {
@@ -35,7 +84,7 @@ class ReportService {
 			FROM questions
 			WHERE has_sql_injection = 1
 			ORDER BY creation_date DESC
-			LIMIT 50
+			LIMIT 1000
 		');
 
 		$rows = $results->fetchAll(\PDO::FETCH_ASSOC);
@@ -55,39 +104,74 @@ class ReportService {
 	}
 
 	public function sqlInjectionsPerCountry() {
-		$countryIds = array();
-		$countryCodeToUserCount = array();
-		foreach (self::$countryStats_ as $row) {
-			$n = $row[1];
-			$country = Country::byName($n);
-			$countryIds[] = $country->geoname_id;
-			$countryCodeToUserCount[$country->code] = self::parseNum($row[4]);
-		}
-
-		$results = $this->db_->getPdo()->query('
-			SELECT
-				countries.geoname_id,
-				country AS country_code,
-				count(country) AS total
-			FROM questions
-			JOIN users ON users.user_id = questions.owner_id
-			JOIN countries ON users.country = countries.code
-			WHERE has_sql_injection = 1 AND country IS NOT NULL
-			GROUP BY country
-			ORDER BY total DESC
-		');
-		$results = $results->fetchAll(\PDO::FETCH_ASSOC);
-
 		$output = array();
-		foreach ($results as $row) {
-			if (!in_array($row['geoname_id'], $countryIds)) continue;
-			$row['country_name'] = Country::countryName($row['country_code']);
-			$row['score'] = ($row['total'] / $countryCodeToUserCount[$row['country_code']] * 1000000);
-			$output[] = $row;
+		$db = $this->db_;
+		$lastId = 0;
+		$lastQuestionId = Question::max('question_id');
+		while (true) {
+			$this->writeln(round(($lastId / $lastQuestionId) * 100) . '%');
+			$sql = 'SELECT question_id, owner_id, has_sql, has_sql_injection FROM questions WHERE owner_id > 0 AND question_id > :question_id AND has_sql = 1 ORDER BY question_id LIMIT 10000';
+			$this->writeln('Fetch questions...');
+			$params = array('question_id' => $lastId);
+			$questions = $this->cache_->getOrSet('ReportService::sqlInjectionsPerCountry_questions' . md5($sql . json_encode($params)), function() use($sql, $db, $params) {
+				$st = $db->getPdo()->prepare($sql);
+				$st->execute($params);
+				return $st->fetchAll(\PDO::FETCH_ASSOC);
+			}, 60 * 60 * 24 * 31);
+
+			if (!count($questions)) break;
+
+			$lastId = $questions[count($questions) - 1]['question_id'];
+
+			$userIds = array();
+			foreach ($questions as $q) $userIds[] = $q['owner_id'];
+
+			$this->writeln('Fetch users...');
+
+			$sql = 'SELECT user_id, country FROM users WHERE country IS NOT NULL AND user_id IN (' . implode(',', $userIds) . ')';
+			$users = $this->cache_->getOrSet('ReportService::sqlInjectionsPerCountry_users' . md5($sql), function() use($sql, $db) {
+				return $db->getPdo()->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+			});
+
+			$temp = array();
+			foreach ($questions as $qIndex => $q) {
+				$country = null;
+				foreach ($users as $u) {
+					if ($u['user_id'] == $q['owner_id']) {
+						$country = $u['country'];
+						break;
+					}
+				}
+				if (!$country) continue;
+
+				$q['country'] = $country;
+				$temp[] = $q;
+			}
+			$questions = $temp;
+
+			foreach ($questions as $q) {
+				if (!array_key_exists($q['country'], $output)) $output[$q['country']] = array('has_sql' => 0, 'has_sql_injection' => 0);
+				$output[$q['country']]['has_sql']++;
+				$output[$q['country']]['has_sql_injection'] += (int)$q['has_sql_injection'] ? 1 : 0;
+			}
 		}
+
+		$topCountries = Country::topCountries();
+		$topCountryCodes = array();
+		foreach ($topCountries as $c) $topCountryCodes[] = $c['country'];
+
+		$temp = array();
+		foreach ($output as $country => $o) {
+			if (!in_array($country, $topCountryCodes)) continue;
+			$o['ratio'] = $o['has_sql'] ? $o['has_sql_injection'] / $o['has_sql'] : 0;
+			$o['code'] = $country;
+			$o['country_name'] = Country::countryName($country);
+			$temp[] = $o;
+		}
+		$output = $temp;
 
 		usort($output, function($a, $b) {
-			return $a['score'] < $b['score'] ? +1 : -1;
+			return $a['ratio'] > $b['ratio'] ? -1 : +1;
 		});
 
 		return $output;
@@ -98,30 +182,5 @@ class ReportService {
 		if (strpos($s, 'K') !== false) return 1000 * str_replace('K', '', $s);
 		return $s;
 	}
-
-	// https://www.quantcast.com/stackoverflow.com#/geographicCard
-	// COUNTRIES, AFFINITY, COMPOSITION, UNIQUES
-	static private $countryStats_ = array(
-		array('1', 'United States', '0.53x', '25.18%', '12.9M'),
-		array('2', 'India', '4.71x', '11.50%', '5.9M'),
-		array('3', 'United Kingdom', '1.79x', '5.48%', '2.8M'),
-		array('4', 'Germany', '1.69x', '4.36%', '2.2M'),
-		array('5', 'China', '5.27x', '3.85%', '2M'),
-		array('6', 'Canada', '1.52x', '3.21%', '1.6M'),
-		array('7', 'Brazil', '0.94x', '2.56%', '1.3M'),
-		array('8', 'France', '1.1x', '2.45%', '1.3M'),
-		array('9', 'Russia', '1.87x', '2.27%', '1.2M'),
-		array('10', 'Australia', '1.85x', '1.87%', '958.2K'),
-		array('11', 'Japan', '0.87x', '1.68%', '861.7K'),
-		array('12', 'Spain', '1.21x', '1.63%', '836.3K'),
-		array('13', 'Italy', '1.13x', '1.62%', '828.5K'),
-		array('14', 'Netherlands', '2.36x', '1.59%', '815.5K'),
-		array('15', 'Korea, Republic Of', '1.87x', '1.32%', '678.9K'),
-		array('16', 'Poland', '1.55x', '1.22%', '627K'),
-		array('17', 'Indonesia', '1.22x', '1.18%', '603.5K'),
-		array('18', 'Philippines', '1.76x', '1.07%', '549.6K'),
-		array('19', 'Mexico', '0.67x', '1.05%', '538.4K'),
-		array('20', 'Ukraine', '2.62x', '0.94%', '479.9K'),
-	);
 
 }

@@ -1,0 +1,277 @@
+<!doctype html>
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://cdn.rawgit.com/phstc/jquery-dateFormat/master/dist/dateFormat.min.js"></script>
+<style>
+body {
+	font-family: Sans-Serif;
+	background-color: black;
+	color: #ddd;
+}
+h1 {
+	text-align: center;
+}
+.page {
+	max-width: 1024px;
+	margin-left: auto;
+	margin-right: auto;
+}
+#latest-injections {
+	max-height: 600px;
+	overflow-y: scroll;
+}
+#latest-injections table {
+	font-family: monospace;
+	position: relative;
+}
+#latest-injections table td {
+	vertical-align: top;
+	font-size: 1.2em;
+}
+#latest-injections table tr td:first-child {
+	white-space: nowrap;
+	font-weight: bold;
+	padding-right: 1em;
+}
+#latest-injections table tr td:nth-child(2) {
+	word-break: break-all;
+	padding-bottom: 1em;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+	<h1>SQL injections vulnerabilities in Stack Overflow questions</h1>
+
+	<div>
+		<canvas id="injections-per-month-chart"></canvas>
+		<canvas id="injections-percent-per-month-chart"></canvas>
+		<canvas id="injections-per-country-chart"></canvas>
+		<h2>Latest SQL injection vulnerabilities in PHP questions</h2>
+		<div id="latest-injections"></div>
+	</div>
+</div>
+
+<script>
+var monthlyReport = [MONTHLY_REPORT];
+var countryReport = [COUNTRY_REPORT];
+var latestInjections = [LATEST_INJECTIONS];
+
+function createTrendData(data, monthCount) {
+	var output = [];
+	var c = 0;
+	var sum = 0;
+	for (var i = 0; i < data.length; i++) {
+		sum += data[i];
+		c++;
+		if (c == monthCount) {
+			output.push(sum / monthCount);
+			sum = 0;
+			c = 0;
+		}
+	}
+	return output;
+}
+
+function hashCode(s) {
+	var hash = 0;
+	if (s.length == 0) return hash;
+	for (i = 0; i < s.length; i++) {
+		char = s.charCodeAt(i);
+		hash = ((hash<<5)-hash)+char;
+		hash = hash & hash; // Convert to 32bit integer
+	}
+	return hash;
+}
+
+function randColor(n, alpha) {
+	var n1 = Math.abs(hashCode(n)) % 255;
+	var n2 = Math.abs(hashCode(n + n)) % 255;
+	var n3 = Math.abs(hashCode(n + n + n)) % 255;
+	return 'rgba(' + n1 + ',' + n2 + ',' + n3 + ',' + alpha + ')'	
+}
+
+function createCountryData(data) {
+	var max = 20;
+	var output = [];
+	var labels = [];
+	var bgColors = [];
+	var hoverColors = [];
+	for (var i = 0; i < data.length; i++) {
+		var d = data[i];
+		labels.push(d.country_name);
+		output.push(Math.floor(d.ratio * 100));
+		bgColors.push(randColor(d.country_name, 1));
+		hoverColors.push(randColor(d.country_name, 0.7));
+	}
+	return {
+		labels: labels,
+		data: output,
+		backgroundColors: bgColors,
+		hoverColors: hoverColors
+	};
+}
+
+function createInjectionPerMonthCharts() {
+	var labels = [];
+	var data = [];
+	var dataPercent = [];
+	var injectBackgroundColors = [];
+	var injectPercentBackgroundColors = [];
+	var maxCount = 0;
+	var maxPercent = 0;
+	for (var i = 0; i < monthlyReport.length; i++) {
+		var r = monthlyReport[i];
+		if (r.has_sql_injection_count > maxCount) maxCount = r.has_sql_injection_count;
+		if ((r.has_sql_injection_count / r.has_sql_count) * 100 > maxPercent) maxPercent = (r.has_sql_injection_count / r.has_sql_count) * 100;
+	}
+
+	for (var i = 0; i < monthlyReport.length; i++) {
+		var r = monthlyReport[i];
+		var m = r.month.toString();
+		var percent = (r.has_sql_injection_count / r.has_sql_count) * 100;
+		labels.push(m.substring(4) + '/' + m.substring(0, 4));
+		data.push(r.has_sql_injection_count);
+		dataPercent.push(percent);
+
+		var p = r.has_sql_injection_count / maxCount;
+		var colorR = Math.round(255 * p);
+		var colorG = Math.round(255 * (1 - p));
+		injectBackgroundColors.push('rgba(' + colorR +', ' + colorG + ', 80, 0.7)');
+
+		p = percent / maxPercent;
+		colorR = Math.round(255 * p);
+		colorG = Math.round(255 * (1 - p));
+		injectPercentBackgroundColors.push('rgba(' + colorR +', ' + colorG + ', 80, 0.7)');
+	}
+
+	var ctx = document.getElementById("injections-per-month-chart");
+
+	var myChart = new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: labels,
+			datasets: [{
+				label: "PHP/MySQL questions that contain SQL injections, per month",
+				backgroundColor: injectBackgroundColors,
+				data: data,
+			}]
+		},
+		options: {
+			scales: {
+				yAxes: [{
+					ticks: {
+						beginAtZero:true
+					}
+				}]
+			}
+		}
+	});
+
+	var ctx2 = document.getElementById("injections-percent-per-month-chart");
+
+	var myChart2 = new Chart(ctx2, {
+		type: 'bar',
+		data: {
+			labels: labels,
+			datasets: [{
+				label: "SQL injections as a percentage of PHP/MySQL-related questions, per month",
+				backgroundColor: injectPercentBackgroundColors,
+				data: dataPercent,
+			}]
+		},
+		options: {
+			tooltips: {
+				callbacks: {
+					label: function(item, data) {
+						return Math.round(item.yLabel) + "%";
+					}
+				}
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+						beginAtZero:true
+					}
+				}]
+			}
+		}
+	});
+}
+
+function createPerCountryChart() {
+	var ctx3 = document.getElementById("injections-per-country-chart");
+
+	var d = createCountryData(countryReport);
+
+	var data = {
+		labels: d.labels,
+		datasets: [
+			{
+				label: 'Percentage of questions with SQL injections per country',
+				data: d.data,
+				backgroundColor: d.backgroundColors,
+				hoverBackgroundColor: d.hoverColors
+			}]
+	};
+
+	var myChart2 = new Chart(ctx3, {
+		type: 'bar',
+		data: data,
+		options: {
+			tooltips: {
+				callbacks: {
+					label: function(item, data) {
+						var c = countryReport[item.index];
+						return item.yLabel + "% (" + c.has_sql_injection + '/' + c.has_sql + ')';
+					}
+				}
+			},
+			scales: {
+				xAxes: [{
+					ticks: {
+						autoSkip: false
+					}
+				}],
+				yAxes: [{
+					ticks: {
+						suggestedMin: 30,
+						suggestedMax: 55,
+						autoSkip: false
+					}
+				}]
+			}
+		}
+	});
+}
+	
+function createLatestInjectionList() {
+	var $target = $('#latest-injections');
+	var $table = $('<table></table>');
+	for (var i = 0; i < latestInjections.length; i++) {
+		var l = latestInjections[i];
+		var $tr = $('<tr></tr>');
+		var date = new Date(l.creation_date * 1000);
+		var date = DateFormat.format.date(date, 'dd/MM/yyyy hh:mm:ss');
+		var $date = $('<td>' + date + ':</td>');
+		$tr.append($date);
+		var $line = $('<td></td>');
+		$line.text(l.line);
+		$tr.append($line);
+		$table.append($tr);
+	}
+	$target.append($table);
+}
+
+Chart.defaults.global.defaultFontColor = '#ddd';
+
+createInjectionPerMonthCharts(); 
+createPerCountryChart();
+createLatestInjectionList();
+</script>
+
+</body>
+</html>
