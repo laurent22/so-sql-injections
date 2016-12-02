@@ -28,7 +28,7 @@ class StackExchangeApi extends BaseService {
 		curl_close($ch);
 
 		$d = json_decode($data, true);
-		if ($d === false) throw new Exception('Could not decode JSON: ' . $data);
+		if ($d === false) throw new \Exception('Could not decode JSON: ' . $data);
 		return $d;
 	}
 
