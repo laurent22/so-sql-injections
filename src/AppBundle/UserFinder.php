@@ -11,10 +11,16 @@ class UserFinder extends BaseService {
 	private $db_ = null;
 	private $api_ = null;
 	private $userIds_ = array();
+	private $bufferSize_ = 100;
 
 	public function __construct($eloquent, $stackExchangeApi) {
 		$this->db_ = $eloquent->connection();
 		$this->api_ = $stackExchangeApi;
+	}
+
+	public function setOutput($output) {
+		$this->api_->setOutput($output);
+		parent::setOutput($output);
 	}
 
 	public function execute() {
@@ -24,8 +30,9 @@ class UserFinder extends BaseService {
 		while (true) {
 			$ownerIds = Question::ownerIdsWithNoUserObject($lastId, $limit);
 			if (!count($ownerIds)) break;
+			$this->writeln(sprintf('Adding %s users...', count($ownerIds)));
 			$this->processUsers($ownerIds);
-			if (count($ownerIds) <= 1) break;
+			if (count($ownerIds) < $this->bufferSize_) break;
 			$lastId = $ownerIds[count($ownerIds) - 1];			
 		}
 
@@ -40,16 +47,16 @@ class UserFinder extends BaseService {
 		$allUsers = $userIds === 'all';
 		if (!count($userIds) && !$allUsers) return;
 
-		$bufferSize = 100;
-
 		if (!$allUsers) {
 			$this->userIds_ = array_merge($this->userIds_, $userIds);
 			$this->userIds_ = array_unique($this->userIds_);
 		}
 		
-		while (count($this->userIds_) >= $bufferSize) {
-			$d = array_slice($this->userIds_, 0, $bufferSize);
-			$this->userIds_ = array_slice($this->userIds_, $bufferSize);
+		while (count($this->userIds_) >= $this->bufferSize_ || $allUsers) {
+			$d = array_slice($this->userIds_, 0, $this->bufferSize_);
+			$this->userIds_ = array_slice($this->userIds_, $this->bufferSize_);
+
+			if (!count($d)) break;
 
 			$results = array();
 			while (true) {

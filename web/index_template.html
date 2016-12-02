@@ -1,13 +1,14 @@
 <!doctype html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.bundle.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="https://cdn.rawgit.com/phstc/jquery-dateFormat/master/dist/dateFormat.min.js"></script>
 <style>
 body {
 	font-family: Sans-Serif;
-	background-color: black;
+	background-color: #222222;
 	color: #ddd;
 }
 h1 {
@@ -28,7 +29,6 @@ h1 {
 }
 #latest-injections table td {
 	vertical-align: top;
-	font-size: 1.2em;
 }
 #latest-injections table tr td:first-child {
 	white-space: nowrap;
@@ -38,6 +38,12 @@ h1 {
 #latest-injections table tr td:nth-child(2) {
 	word-break: break-all;
 	padding-bottom: 1em;
+}
+#generation-date {
+    margin-top: 1em;
+    text-align: center;
+    margin-bottom: 1em;
+    color: #777;
 }
 </style>
 </head>
@@ -52,6 +58,7 @@ h1 {
 		<canvas id="injections-per-country-chart"></canvas>
 		<h2>Latest SQL injection vulnerabilities in PHP questions</h2>
 		<div id="latest-injections"></div>
+		<div id="generation-date"></div>
 	</div>
 </div>
 
@@ -59,6 +66,7 @@ h1 {
 var monthlyReport = [MONTHLY_REPORT];
 var countryReport = [COUNTRY_REPORT];
 var latestInjections = [LATEST_INJECTIONS];
+var generationTimestamp = [GENERATION_TIMESTAMP];
 
 function createTrendData(data, monthCount) {
 	var output = [];
@@ -155,7 +163,7 @@ function createInjectionPerMonthCharts() {
 		data: {
 			labels: labels,
 			datasets: [{
-				label: "PHP/MySQL questions that contain SQL injections, per month",
+				label: "PHP questions that contain SQL injections, per month",
 				backgroundColor: injectBackgroundColors,
 				data: data,
 			}]
@@ -178,7 +186,7 @@ function createInjectionPerMonthCharts() {
 		data: {
 			labels: labels,
 			datasets: [{
-				label: "SQL injections as a percentage of PHP/MySQL-related questions, per month",
+				label: "SQL injections as a percentage of PHP-MySQL-related questions, per month",
 				backgroundColor: injectPercentBackgroundColors,
 				data: dataPercent,
 			}]
@@ -211,7 +219,7 @@ function createPerCountryChart() {
 		labels: d.labels,
 		datasets: [
 			{
-				label: 'Percentage of questions with SQL injections per country',
+				label: 'Percentage of PHP-MySQL questions with SQL injections per country',
 				data: d.data,
 				backgroundColor: d.backgroundColors,
 				hoverBackgroundColor: d.hoverColors
@@ -271,6 +279,9 @@ Chart.defaults.global.defaultFontColor = '#ddd';
 createInjectionPerMonthCharts(); 
 createPerCountryChart();
 createLatestInjectionList();
+
+var genDate = new Date(generationTimestamp * 1000);
+$('#generation-date').text('Generated on ' + DateFormat.format.date(genDate, 'dd/MM/yyyy hh:mm:ss'));
 </script>
 
 </body>

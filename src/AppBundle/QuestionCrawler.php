@@ -11,12 +11,10 @@ use AppBundle\BaseService;
 
 class QuestionCrawler extends BaseService {
 
-	private $settingPath_;
 	private $db_ = null;
 	private $api_ = null;
 
 	public function __construct($rootDir, $eloquent, $stackExchangeApi) {
-		$this->settingPath_	= dirname($rootDir) . '/var/crawler_settings.json';
 		$this->db_ = $eloquent->connection();
 		$this->api_ = $stackExchangeApi;
 	}
@@ -27,39 +25,18 @@ class QuestionCrawler extends BaseService {
 	}
 
 	public function execute() {
-		$settings = $this->loadSettings();
+		$fromDate = new \DateTime();
 
-		if (!isset($settings['fromDate'])) {
-			$d = new \DateTime();
-			$d->setDate(2008,7,1); // Private beta
-			//$d->setDate(2008,7,31); // Private beta
-			//$d->setDate(2008,9,15); // Public beta
-			$d->setTime(0,0,0);
-			$settings['fromDate'] = $d->getTimestamp();
+		$lastTimestamp = Question::lastQuestionDate();
+		if ($lastTimestamp) {
+			$fromDate->setTimestamp($lastTimestamp);
+		} else {
+			$fromDate->setDate(2008,7,1); // Private beta
 		}
 
-		if (!isset($settings['page'])) {
-			$settings['page'] = 0;
-		}
-
-		if (!isset($settings['hasMore'])) {
-			$settings['hasMore'] = true;
-		}
-
-		$fromDate = new \DateTime('@' . $settings['fromDate']);
 		$toDate = clone $fromDate;
 		$toDate->add(new \DateInterval('P' . $fromDate->format('t') . 'D'));
-
-		$page = $settings['page'];
-
-		if (!$settings['hasMore']) {
-			$fromDate = clone $toDate;
-			$toDate = clone $fromDate;
-			$toDate->add(new \DateInterval('P' . $fromDate->format('t') . 'D'));
-			$page = 1;
-		} else {
-			$page++;
-		}
+		$page = 1;
 
 		while (true) {
 			$result = $this->api_->questions($fromDate->getTimestamp(), $toDate->getTimestamp(), $page);
@@ -85,13 +62,6 @@ class QuestionCrawler extends BaseService {
 
 			if (!isset($result['items'])) throw new \Exception('No "items" property on object: ' . json_encode($result));
 			$this->saveQuestions($result['items']);
-			$settings['fromDate'] = $fromDate->getTimestamp();
-			$settings['toDate'] = $toDate->getTimestamp();
-			$settings['page'] = $page;
-			$settings['hasMore'] = $result['has_more'];
-			$settings['total'] = $result['total'];
-
-			$this->saveSettings($settings);
 
 			if (!$result['has_more']) {
 				$expectedPageCount = ceil($result['total'] / $this->api_->pageSize());
@@ -172,17 +142,6 @@ class QuestionCrawler extends BaseService {
 
 			$offset += $limit;
 		}
-	}
-
-	private function loadSettings() {
-		if (!file_exists($this->settingPath_)) return array();
-		$d = file_get_contents($this->settingPath_);
-		if ($d === false) return array();
-		return json_decode($d, true);
-	}
-
-	private function saveSettings($settings) {
-		file_put_contents($this->settingPath_, json_encode($settings));
 	}
 
 

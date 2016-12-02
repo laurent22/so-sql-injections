@@ -25,6 +25,7 @@ class GenerateStaticWebsiteCommand extends ContainerAwareCommand {
 		$content = str_replace('[MONTHLY_REPORT]', json_encode($service->monthlyInjections()), $content);
 		$content = str_replace('[COUNTRY_REPORT]', json_encode($service->sqlInjectionsPerCountry()), $content);
 		$content = str_replace('[LATEST_INJECTIONS]', json_encode($service->latestInjections()), $content);
+		$content = str_replace('[GENERATION_TIMESTAMP]', json_encode(time()), $content);
 
 		file_put_contents($outputFile, $content);
 	}

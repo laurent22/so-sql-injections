@@ -42,18 +42,19 @@ class Question extends \Illuminate\Database\Eloquent\Model {
 	// no correspondance in the users table.
 	static public function ownerIdsWithNoUserObject($minId, $limit) {
 		$con = (new self())->getConnection();
-		$results = $con->getPdo()->query(sprintf('
+		$st = $con->getPdo()->prepare('
 			SELECT DISTINCT owner_id
 			FROM questions
 			LEFT JOIN users ON questions.owner_id = users.user_id
 			WHERE
 				owner_id != 0
 				AND users.raw_json IS NULL
-				AND question_id > %s
-			LIMIT %s
-		', (int)$minId, (int)$limit));
-
-		$r = $results->fetchAll(\PDO::FETCH_ASSOC);
+				AND question_id > :question_id
+			LIMIT :limit
+		');
+		$st->execute(array('question_id' => $minId, 'limit' => $limit));
+		$r = $st->fetchAll(\PDO::FETCH_ASSOC);
+		
 		$output = array();
 		foreach ($r as $v) $output[] = $v['owner_id'];
 		return $output;

@@ -1,10 +1,5 @@
 <?php
 
-// - Latest injections
-// - Injections over time
-// - Totals as of <date>
-// - Put sample size per country
-
 namespace AppBundle;
 
 use AppBundle\Model\Question;
@@ -37,7 +32,7 @@ class ReportService extends BaseService {
 
 			$cacheTimeout = 60 * 60 * 24 * 31 * 12;
 			$now = new \DateTime();
-			if ($d2->format('Y') >= $now->format('Y') && $d2->format('m') >= $now->format('m')) {
+			if ($d2->format('Ym') >= $now->format('Ym')) {
 				$cacheTimeout = 60 * 60 * 24;
 			}
 
@@ -128,11 +123,23 @@ class ReportService extends BaseService {
 
 			$this->writeln('Fetch users...');
 
-			$sql = 'SELECT user_id, country FROM users WHERE country IS NOT NULL AND user_id IN (' . implode(',', $userIds) . ')';
-			$users = $this->cache_->getOrSet('ReportService::sqlInjectionsPerCountry_users' . md5($sql), function() use($sql, $db) {
-				return $db->getPdo()->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+			$params = array();
+			$s = '';
+			$i = 1;
+			foreach ($userIds as $id) {
+				$k = 'i' . $i;
+				$params[$k] = $id;
+				if ($s != '') $s .= ',';
+				$s .= ':' . $k;
+				$i++;
+			}
+			$sql = 'SELECT user_id, country FROM users WHERE country IS NOT NULL AND user_id IN (' . $s . ')';
+			$users = $this->cache_->getOrSet('ReportService::sqlInjectionsPerCountry_users' . md5($sql), function() use($sql, $db, $params) {
+				$st = $db->getPdo()->prepare($sql);
+				$st->execute($params);
+				return $st->fetchAll(\PDO::FETCH_ASSOC);
 			});
-
+			
 			$temp = array();
 			foreach ($questions as $qIndex => $q) {
 				$country = null;
@@ -175,12 +182,6 @@ class ReportService extends BaseService {
 		});
 
 		return $output;
-	}
-
-	static private function parseNum($s) {
-		if (strpos($s, 'M') !== false) return 1000000 * str_replace('M', '', $s);
-		if (strpos($s, 'K') !== false) return 1000 * str_replace('K', '', $s);
-		return $s;
 	}
 
 }
