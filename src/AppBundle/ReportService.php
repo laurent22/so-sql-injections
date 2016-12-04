@@ -75,7 +75,7 @@ class ReportService extends BaseService {
 
 	public function latestInjections() {
 		$results = $this->db_->getPdo()->query('
-			SELECT *
+			SELECT question_id, body_markdown, sql_injection_line, creation_date
 			FROM questions
 			WHERE has_sql_injection = 1
 			ORDER BY creation_date DESC
@@ -92,6 +92,7 @@ class ReportService extends BaseService {
 			$output[] = array(
 				'line' => trim($line),
 				'creation_date' => $row['creation_date'],
+				'question_id' => $row['question_id'],
 			);
 		}
 
@@ -119,27 +120,16 @@ class ReportService extends BaseService {
 			$lastId = $questions[count($questions) - 1]['question_id'];
 
 			$userIds = array();
-			foreach ($questions as $q) $userIds[] = $q['owner_id'];
+			foreach ($questions as $q) $userIds[] = (int)$q['owner_id'];
 
 			$this->writeln('Fetch users...');
 
-			$params = array();
-			$s = '';
-			$i = 1;
-			foreach ($userIds as $id) {
-				$k = 'i' . $i;
-				$params[$k] = $id;
-				if ($s != '') $s .= ',';
-				$s .= ':' . $k;
-				$i++;
-			}
+			$s = implode(',', $userIds);
 			$sql = 'SELECT user_id, country FROM users WHERE country IS NOT NULL AND user_id IN (' . $s . ')';
-			$users = $this->cache_->getOrSet('ReportService::sqlInjectionsPerCountry_users' . md5($sql), function() use($sql, $db, $params) {
-				$st = $db->getPdo()->prepare($sql);
-				$st->execute($params);
-				return $st->fetchAll(\PDO::FETCH_ASSOC);
+			$users = $this->cache_->getOrSet('ReportService::sqlInjectionsPerCountry_users' . md5($sql), function() use($sql, $db) {
+				return $db->getPdo()->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
 			});
-			
+	
 			$temp = array();
 			foreach ($questions as $qIndex => $q) {
 				$country = null;

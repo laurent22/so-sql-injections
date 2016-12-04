@@ -39,26 +39,38 @@ h1 {
 	word-break: break-all;
 	padding-bottom: 1em;
 }
-#generation-date {
+#latest-injections a {
+	text-decoration: none;
+}
+#latest-injections a:hover {
+	text-decoration: underline;
+}
+.footer {
     margin-top: 1em;
     text-align: center;
     margin-bottom: 1em;
+}
+#generation-date {
     color: #777;
+}
+a {
+	color: #ddd;
 }
 </style>
 </head>
 <body>
 
 <div class="page">
-	<h1>SQL injections vulnerabilities in Stack Overflow questions</h1>
+	<h1>SQL injections vulnerabilities in Stack Overflow PHP questions</h1>
 
 	<div>
 		<canvas id="injections-per-month-chart"></canvas>
 		<canvas id="injections-percent-per-month-chart"></canvas>
 		<canvas id="injections-per-country-chart"></canvas>
 		<h2>Latest SQL injection vulnerabilities in PHP questions</h2>
+		<p>(Click on the date to open the question)</p>
 		<div id="latest-injections"></div>
-		<div id="generation-date"></div>
+		<div class="footer"><a href="https://github.com/laurent22/so-sql-injections">Source on GitHub</a> - <span id="generation-date"></span></div>
 	</div>
 </div>
 
@@ -246,8 +258,8 @@ function createPerCountryChart() {
 				}],
 				yAxes: [{
 					ticks: {
-						suggestedMin: 30,
-						suggestedMax: 55,
+						suggestedMin: 25,
+						suggestedMax: 50,
 						autoSkip: false
 					}
 				}]
@@ -263,8 +275,12 @@ function createLatestInjectionList() {
 		var l = latestInjections[i];
 		var $tr = $('<tr></tr>');
 		var date = new Date(l.creation_date * 1000);
-		var date = DateFormat.format.date(date, 'dd/MM/yyyy hh:mm:ss');
-		var $date = $('<td>' + date + ':</td>');
+		var date = DateFormat.format.date(date, 'dd/MM/yyyy HH:mm:ss');
+		var $link = $('<a />');
+		$link.attr('href', 'https://stackoverflow.com/questions/' + l.question_id);
+		$link.text(date + ':');
+		var $date = $('<td />');
+		$date.append($link);
 		$tr.append($date);
 		var $line = $('<td></td>');
 		$line.text(l.line);
@@ -281,7 +297,7 @@ createPerCountryChart();
 createLatestInjectionList();
 
 var genDate = new Date(generationTimestamp * 1000);
-$('#generation-date').text('Generated on ' + DateFormat.format.date(genDate, 'dd/MM/yyyy hh:mm:ss'));
+$('#generation-date').text('Generated on ' + DateFormat.format.date(genDate, 'dd/MM/yyyy HH:mm:ss'));
 </script>
 
 </body>

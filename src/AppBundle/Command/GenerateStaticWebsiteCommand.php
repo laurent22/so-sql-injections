@@ -17,7 +17,7 @@ class GenerateStaticWebsiteCommand extends ContainerAwareCommand {
 	protected function execute(InputInterface $input, OutputInterface $output) {
 		$service = $this->getContainer()->get('app.report_service');
 		$service->setOutput($output);
-
+		
 		$rootDir = $this->getContainer()->get('kernel')->getRootDir();
 		$content = file_get_contents(dirname($rootDir) . '/web/index_template.html');
 		$outputFile = dirname($rootDir) . '/web/index.html';
