@@ -11,6 +11,7 @@ class Question extends \Illuminate\Database\Eloquent\Model {
 
 	public function fromApiArray($a) {
 		if (!isset($a['body_markdown'])) throw new \Exception('Question without a body_markdown property: ' . json_encode($a), 22220);
+		if (!isset($a['creation_date'])) throw new \Exception('Question without a creation_date property: ' . json_encode($a), 22220);
 
 		$this->question_id = $a['question_id'];
 		$this->body_markdown = $a['body_markdown'];
